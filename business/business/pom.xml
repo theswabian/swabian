@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.swabian</groupId>
+    <artifactId>business-root</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>business</artifactId>
+  <packaging>pom</packaging>
+  <name>Swabian</name>
+
+  <properties>
+    <org.swabian.business.version>${project.version}</org.swabian.business.version>
+    <jdk.source.version>17</jdk.source.version>
+    <org.eclipse.scout.rt.version>22.0.41</org.eclipse.scout.rt.version>
+    <master_npm_release_dependency_mapping>--mapping.0.regex=@eclipse-scout --mapping.0.version=${org.eclipse.scout.rt.version}</master_npm_release_dependency_mapping>
+  </properties>
+
+  <modules>
+    <module>../business.shared</module>
+    <module>../business.server</module>
+    <module>../business.client</module>
+    <module>../business.server.app.war</module>
+    <module>../business.server.app.dev</module>
+    <module>../business.ui.html</module>
+    <module>../business.ui.html.app.war</module>
+    <module>../business.ui.html.app.dev</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Scout Dependencies -->
+      <dependency>
+        <groupId>org.eclipse.scout.rt</groupId>
+        <artifactId>org.eclipse.scout.rt</artifactId>
+        <version>${org.eclipse.scout.rt.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- Application Dependencies -->
+      <dependency>
+        <groupId>org.swabian</groupId>
+        <artifactId>business.client</artifactId>
+        <version>${org.swabian.business.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.swabian</groupId>
+        <artifactId>business.shared</artifactId>
+        <version>${org.swabian.business.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.swabian</groupId>
+        <artifactId>business.server</artifactId>
+        <version>${org.swabian.business.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.swabian</groupId>
+        <artifactId>business.ui.html</artifactId>
+        <version>${org.swabian.business.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>
