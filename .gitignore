@@ -21,3 +21,40 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# Backupfiles from mergetools #
+*.orig
+
+# Java Class Files #
+*.class
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+# Eclipse #
+bin/
+classes/
+# Maven #
+target/
+# settings files are handled in rt-feature project and settings files should not be changed (can be enforecd with 'git add .settings -f')
+/.settings
+/.project
+# Sonar settings potentially change after every build
+org.sonar.ide.eclipse.core.prefs
+
+# Git
+*.orig
+
+# Maven
+target/
+.surefire-*
+.flattened-pom.xml
+
+# Node
+node_modules/
+test-results/
+
+# Do not check in any log files
+*.log
+
