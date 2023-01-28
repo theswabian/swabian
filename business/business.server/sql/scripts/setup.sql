@@ -48,7 +48,8 @@ SET default_table_access_method = heap;
 --
 
 CREATE TABLE public.citizen (
-    id bigint NOT NULL
+    id uuid NOT NULL,
+    handle text NOT NULL
 );
 
 
@@ -66,6 +67,14 @@ ALTER TABLE public.citizen OWNER TO swabian;
 
 ALTER TABLE ONLY public.citizen
     ADD CONSTRAINT citizen_pk PRIMARY KEY (id);
+
+
+--
+-- Name: citizen citizen_un; Type: CONSTRAINT; Schema: public; Owner: swabian
+--
+
+ALTER TABLE ONLY public.citizen
+    ADD CONSTRAINT citizen_un UNIQUE (handle);
 
 
 --

@@ -1,6 +1,5 @@
 package org.swabian.business.client.citizen;
 
-import java.util.Date;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -11,11 +10,9 @@ import org.eclipse.scout.rt.client.ui.form.AbstractFormHandler;
 import org.eclipse.scout.rt.client.ui.form.IForm;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractCancelButton;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractOkButton;
-import org.eclipse.scout.rt.client.ui.form.fields.datefield.AbstractDateField;
 import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
 import org.eclipse.scout.rt.client.ui.form.fields.imagefield.AbstractImageField;
 import org.eclipse.scout.rt.client.ui.form.fields.labelfield.AbstractLabelField;
-import org.eclipse.scout.rt.client.ui.form.fields.radiobuttongroup.AbstractRadioButtonGroup;
 import org.eclipse.scout.rt.client.ui.form.fields.sequencebox.AbstractSequenceBox;
 import org.eclipse.scout.rt.client.ui.form.fields.smartfield.AbstractSmartField;
 import org.eclipse.scout.rt.client.ui.form.fields.stringfield.AbstractStringField;
@@ -25,9 +22,7 @@ import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.classid.ClassId;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.platform.text.TEXTS;
-import org.eclipse.scout.rt.platform.util.ObjectUtility;
 import org.eclipse.scout.rt.platform.util.StringUtility;
-import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.CancelButton;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox;
@@ -46,16 +41,18 @@ import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.WorkBo
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.WorkBox.PhoneWorkField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.WorkBox.PositionField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox;
-import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.DateOfBirthField;
-import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.GenderGroup;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.FluencyField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.HandleField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.MonikerField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.PictureField;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.RankBox;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.RankBox.RankField;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.RankBox.RankImageField;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.SpaceField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.OkButton;
 import org.swabian.business.client.common.AbstractDirtyFormHandler;
 import org.swabian.business.client.common.CountryLookupCall;
 import org.swabian.business.shared.citizen.CitizenFormData;
-import org.swabian.business.shared.citizen.GenderCodeType;
 import org.swabian.business.shared.citizen.ICitizenService;
 import org.swabian.business.shared.citizen.RSICrawler;
 import org.swabian.business.shared.citizen.UpdateCitizenPermission;
@@ -106,6 +103,22 @@ public class CitizenForm extends AbstractForm {
 		return getFieldByClass(CancelButton.class);
 	}
 
+	public SpaceField getMyLabelField() {
+		return getFieldByClass(SpaceField.class);
+	}
+
+	public RankBox getRankBox() {
+		return getFieldByClass(RankBox.class);
+	}
+
+	public RankField getRankField() {
+		return getFieldByClass(RankField.class);
+	}
+
+	public FluencyField getFluencyField() {
+		return getFieldByClass(FluencyField.class);
+	}
+
 	public NotesBox getNotesBox() {
 		return getFieldByClass(NotesBox.class);
 	}
@@ -122,8 +135,8 @@ public class CitizenForm extends AbstractForm {
 		return getFieldByClass(ContactInfoBox.class);
 	}
 
-	public DateOfBirthField getDateOfBirthField() {
-		return getFieldByClass(DateOfBirthField.class);
+	public RankImageField getDateOfBirthField() {
+		return getFieldByClass(RankImageField.class);
 	}
 
 	public DetailsBox getDetailsBox() {
@@ -140,10 +153,6 @@ public class CitizenForm extends AbstractForm {
 
 	public HandleField getHandleField() {
 		return getFieldByClass(HandleField.class);
-	}
-
-	public GenderGroup getGenderGroup() {
-		return getFieldByClass(GenderGroup.class);
 	}
 
 	public GeneralBox getGeneralBox() {
@@ -253,13 +262,26 @@ public class CitizenForm extends AbstractForm {
 				}
 			}
 
+			@Order(35)
+			@FormData(sdkCommand = FormData.SdkCommand.IGNORE)
+			public class SpaceField extends AbstractLabelField {
+			}
+
 			@Order(40)
-			@ClassId("8679ade5-21fb-470e-8f00-13bd15199101")
+			@FormData(sdkCommand = FormData.SdkCommand.IGNORE)
 			public class MonikerField extends AbstractLabelField {
+
+				private String communityMoniker;
 
 				@Override
 				protected String getConfiguredLabel() {
 					return TEXTS.get("CommunityMoniker");
+				}
+
+				@Override
+				protected boolean getConfiguredHtmlEnabled() {
+
+					return true;
 				}
 
 				@Override
@@ -269,50 +291,122 @@ public class CitizenForm extends AbstractForm {
 
 				@Override
 				protected void execChangedMasterValue(Object newMasterValue) {
-					setValue(RSICrawler.getCommunityMoniker((String) newMasterValue));
+					String handle = (String) newMasterValue;
+					communityMoniker = RSICrawler.getCommunityMoniker(handle);
+					setValue("<p><span style=\"font-size:24px\"><a href=\"https://robertsspaceindustries.com/citizens/"
+							+ handle + "\"><strong>" + communityMoniker + "</strong></a></span></p>");
+//					setValue(RSICrawler.getCommunityMoniker(handle));
+				}
+
+				public String getCommunityMoniker() {
+					return this.communityMoniker;
 				}
 
 			}
 
-			@Order(50)
-			@ClassId("7c602360-9daa-44b8-abb6-94ccf9b9db59")
-			public class DateOfBirthField extends AbstractDateField {
-
+			@Order(45)
+			public class RankBox extends AbstractSequenceBox {
 				@Override
 				protected String getConfiguredLabel() {
-					return TEXTS.get("DateOfBirth");
+					return TEXTS.get("Rank");
 				}
-				// end::dateOfBirthField[]
 
 				@Override
-				protected Date execValidateValue(Date rawValue) {
-					if (ObjectUtility.compareTo(rawValue, new Date()) > 0) {
-						throw new VetoException(TEXTS.get("DateOfBirthCanNotBeInFuture"));
+				protected boolean getConfiguredAutoCheckFromTo() {
+					return false;
+				}
+
+				@Order(1000)
+				@FormData(sdkCommand = FormData.SdkCommand.IGNORE)
+				public class RankField extends AbstractLabelField {
+					@Override
+					protected boolean getConfiguredLabelVisible() {
+						return false;
 					}
 
-					return super.execValidateValue(rawValue);
+					@Override
+					protected Class<? extends HandleField> getConfiguredMasterField() {
+						return HandleField.class;
+					}
+
+					@Override
+					protected void execChangedMasterValue(Object newMasterValue) {
+						setValue(RSICrawler.getRank((String) newMasterValue));
+					}
+
+					@Override
+					protected boolean getConfiguredFillHorizontal() {
+						return false;
+					}
+
 				}
-				// tag::dateOfBirthField[]
+
+				@Order(2000)
+				@FormData(sdkCommand = FormData.SdkCommand.IGNORE)
+				public class RankImageField extends AbstractImageField {
+
+					@Override // <2>
+					protected Class<HandleField> getConfiguredMasterField() {
+						return HandleField.class;
+					}
+
+					@Override // <3>
+					protected void execChangedMasterValue(Object newMasterValue) {
+						setImageUrl(RSICrawler.getRankUrl((String) newMasterValue));
+					}
+
+					@Override
+					protected boolean getConfiguredLabelVisible() {
+						return false;
+					}
+
+					@Override
+					protected int getConfiguredHorizontalAlignment() {
+						return -1;
+					}
+
+					@Override
+					protected double getConfiguredGridWeightX() {
+						return 250;
+					}
+
+					@Override
+					protected boolean getConfiguredFillHorizontal() {
+						return true;
+					}
+
+					@Override
+					protected boolean getConfiguredAutoFit() {
+						return true;
+					}
+
+					@Override
+					protected int getConfiguredWidthInPixel() {
+						return 26;
+					}
+				}
+
 			}
-			// end::dateOfBirthField[]
-			// tag::genderField[]
 
-			@Order(60)
-			@ClassId("b9d0593e-3938-4f97-bdca-fdb6a1ce1d77")
-			public class GenderGroup extends AbstractRadioButtonGroup<String> {
-
+			@Order(2000)
+			@FormData(sdkCommand = FormData.SdkCommand.IGNORE)
+			public class FluencyField extends AbstractLabelField {
 				@Override
 				protected String getConfiguredLabel() {
-					return TEXTS.get("Gender");
+					return TEXTS.get("Fluency");
 				}
 
-				@Override // <1>
-				protected Class<? extends ICodeType<?, String>> getConfiguredCodeType() {
-					return GenderCodeType.class;
+				@Override
+				protected Class<? extends HandleField> getConfiguredMasterField() {
+					return HandleField.class;
+				}
+
+				@Override
+				protected void execChangedMasterValue(Object newMasterValue) {
+					setValue(RSICrawler.getFluency((String) newMasterValue));
 				}
 			}
-			// end::genderField[]
-			// tag::layout[]
+
 		}
 
 		@Order(20)
@@ -742,6 +836,6 @@ public class CitizenForm extends AbstractForm {
 	}
 
 	protected String calculateSubTitle() {
-		return StringUtility.join(" ", getHandleField().getValue(), getMonikerField().getValue());
+		return StringUtility.join(" - ", getMonikerField().getCommunityMoniker(), getHandleField().getValue());
 	}
 }

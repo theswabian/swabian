@@ -1,6 +1,5 @@
 package org.swabian.business.shared.citizen;
 
-import java.util.Date;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -45,10 +44,6 @@ public class CitizenFormData extends AbstractFormData {
 		return getFieldByClass(Country.class);
 	}
 
-	public DateOfBirth getDateOfBirth() {
-		return getFieldByClass(DateOfBirth.class);
-	}
-
 	public Email getEmail() {
 		return getFieldByClass(Email.class);
 	}
@@ -57,20 +52,12 @@ public class CitizenFormData extends AbstractFormData {
 		return getFieldByClass(EmailWork.class);
 	}
 
-	public GenderGroup getGenderGroup() {
-		return getFieldByClass(GenderGroup.class);
-	}
-
 	public Handle getHandle() {
 		return getFieldByClass(Handle.class);
 	}
 
 	public Mobile getMobile() {
 		return getFieldByClass(Mobile.class);
-	}
-
-	public Moniker getMoniker() {
-		return getFieldByClass(Moniker.class);
 	}
 
 	public Notes getNotes() {
@@ -111,11 +98,6 @@ public class CitizenFormData extends AbstractFormData {
 		private static final long serialVersionUID = 1L;
 	}
 
-	@ClassId("7c602360-9daa-44b8-abb6-94ccf9b9db59-formdata")
-	public static class DateOfBirth extends AbstractValueFieldData<Date> {
-		private static final long serialVersionUID = 1L;
-	}
-
 	@ClassId("5f9d9363-8e57-4151-b281-7d401e64702c-formdata")
 	public static class Email extends AbstractValueFieldData<String> {
 		private static final long serialVersionUID = 1L;
@@ -126,11 +108,6 @@ public class CitizenFormData extends AbstractFormData {
 		private static final long serialVersionUID = 1L;
 	}
 
-	@ClassId("b9d0593e-3938-4f97-bdca-fdb6a1ce1d77-formdata")
-	public static class GenderGroup extends AbstractValueFieldData<String> {
-		private static final long serialVersionUID = 1L;
-	}
-
 	@ClassId("359be835-439f-456e-9b0d-c832b034a298-formdata")
 	public static class Handle extends AbstractValueFieldData<String> {
 		private static final long serialVersionUID = 1L;
@@ -138,11 +115,6 @@ public class CitizenFormData extends AbstractFormData {
 
 	@ClassId("7dc64c60-5713-4376-a3e0-41c0a8e2b503-formdata")
 	public static class Mobile extends AbstractValueFieldData<String> {
-		private static final long serialVersionUID = 1L;
-	}
-
-	@ClassId("8679ade5-21fb-470e-8f00-13bd15199101-formdata")
-	public static class Moniker extends AbstractValueFieldData<String> {
 		private static final long serialVersionUID = 1L;
 	}
 

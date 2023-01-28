@@ -17,6 +17,7 @@ import org.eclipse.scout.rt.platform.classid.ClassId;
 import org.eclipse.scout.rt.platform.text.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.swabian.business.client.citizen.CitizenTablePage.Table;
+import org.swabian.business.client.common.QuickNewMenu;
 import org.swabian.business.shared.Icons;
 import org.swabian.business.shared.citizen.CitizenTablePageData;
 import org.swabian.business.shared.citizen.ICitizenService;
@@ -90,6 +91,19 @@ public class CitizenTablePage extends AbstractPageWithTable<Table> {
 				form.addFormListener(new CitizenFormListener());
 				form.startModify();
 			}
+		}
+
+		@Order(20)
+		public class NewMenu extends QuickNewMenu {
+
+			@Override
+			protected void execAction() {
+				CitizenForm form = new CitizenForm();
+				form.addFormListener(new CitizenFormListener());
+				// start the form using its new handler
+				form.startNew();
+			}
+
 		}
 
 		private class CitizenFormListener implements FormListener {
