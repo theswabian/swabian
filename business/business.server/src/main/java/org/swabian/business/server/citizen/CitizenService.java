@@ -27,7 +27,6 @@ public class CitizenService implements ICitizenService {
 		if (!ACCESS.check(new CreateCitizenPermission())) {
 			throw new VetoException(TEXTS.get("AuthorizationFailed"));
 		}
-		// TODO [phohmann] add business logic here.
 		return formData;
 	}
 
@@ -36,7 +35,6 @@ public class CitizenService implements ICitizenService {
 		if (!ACCESS.check(new CreateCitizenPermission())) {
 			throw new VetoException(TEXTS.get("AuthorizationFailed"));
 		}
-		// TODO [phohmann] add business logic here.
 		return formData;
 	}
 
@@ -45,7 +43,7 @@ public class CitizenService implements ICitizenService {
 		if (!ACCESS.check(new ReadCitizenPermission())) {
 			throw new VetoException(TEXTS.get("AuthorizationFailed"));
 		}
-		// TODO [phohmann] add business logic here.
+		SQL.select(SQLCitizen.CITIZEN_SELECT, formData);
 		return formData;
 	}
 

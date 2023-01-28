@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
 
 import org.eclipse.scout.rt.client.dto.FormData;
 import org.eclipse.scout.rt.client.dto.FormData.SdkCommand;
-import org.eclipse.scout.rt.client.ui.desktop.bookmark.BookmarkFolderForm.MainBox.GroupBox.NameField;
 import org.eclipse.scout.rt.client.ui.form.AbstractForm;
 import org.eclipse.scout.rt.client.ui.form.AbstractFormHandler;
 import org.eclipse.scout.rt.client.ui.form.IForm;
@@ -15,6 +14,7 @@ import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractOkButton;
 import org.eclipse.scout.rt.client.ui.form.fields.datefield.AbstractDateField;
 import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
 import org.eclipse.scout.rt.client.ui.form.fields.imagefield.AbstractImageField;
+import org.eclipse.scout.rt.client.ui.form.fields.labelfield.AbstractLabelField;
 import org.eclipse.scout.rt.client.ui.form.fields.radiobuttongroup.AbstractRadioButtonGroup;
 import org.eclipse.scout.rt.client.ui.form.fields.sequencebox.AbstractSequenceBox;
 import org.eclipse.scout.rt.client.ui.form.fields.smartfield.AbstractSmartField;
@@ -29,38 +29,35 @@ import org.eclipse.scout.rt.platform.util.ObjectUtility;
 import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
-import org.swabian.business.client.citizen.CitizenForm.ModifyDirtyHandler;
-import org.swabian.business.client.citizen.CitizenForm.NewDirtyHandler;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.CancelButton;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox;
-import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox;
-import org.swabian.business.client.citizen.CitizenForm.MainBox.OkButton;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.ContactInfoBox;
-import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.NotesBox;
-import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.WorkBox;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.ContactInfoBox.AddressBox;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.ContactInfoBox.AddressBox.LocationBox.CityField;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.ContactInfoBox.AddressBox.LocationBox.CountryField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.ContactInfoBox.EmailField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.ContactInfoBox.MobileField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.ContactInfoBox.PhoneField;
-import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.ContactInfoBox.AddressBox.LocationBox;
-import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.ContactInfoBox.AddressBox.StreetField;
-import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.ContactInfoBox.AddressBox.LocationBox.CityField;
-import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.ContactInfoBox.AddressBox.LocationBox.CountryField;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.NotesBox;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.NotesBox.NotesField;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.WorkBox;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.WorkBox.EmailWorkField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.WorkBox.OrganizationField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.WorkBox.PhoneWorkField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.WorkBox.PositionField;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.DateOfBirthField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.GenderGroup;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.HandleField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.MonikerField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.PictureField;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.OkButton;
 import org.swabian.business.client.common.AbstractDirtyFormHandler;
 import org.swabian.business.client.common.CountryLookupCall;
 import org.swabian.business.shared.citizen.CitizenFormData;
 import org.swabian.business.shared.citizen.GenderCodeType;
 import org.swabian.business.shared.citizen.ICitizenService;
+import org.swabian.business.shared.citizen.RSICrawler;
 import org.swabian.business.shared.citizen.UpdateCitizenPermission;
 
 @FormData(value = CitizenFormData.class, sdkCommand = SdkCommand.CREATE) // <1>
@@ -90,7 +87,7 @@ public class CitizenForm extends AbstractForm {
 
 	@Override
 	protected String getConfiguredTitle() {
-		return TEXTS.get("Person");
+		return TEXTS.get("Citizen");
 	}
 
 	public void startModify() {
@@ -218,13 +215,13 @@ public class CitizenForm extends AbstractForm {
 			public class PictureField extends AbstractImageField {
 
 				@Override // <2>
-				protected Class<NameField> getConfiguredMasterField() {
-					return NameField.class;
+				protected Class<HandleField> getConfiguredMasterField() {
+					return HandleField.class;
 				}
 
 				@Override // <3>
 				protected void execChangedMasterValue(Object newMasterValue) {
-					updateImage((String) newMasterValue);
+					setImageUrl(RSICrawler.getAvatarUrl((String) newMasterValue));
 				}
 
 				@Override
@@ -242,9 +239,6 @@ public class CitizenForm extends AbstractForm {
 					return true;
 				}
 
-				protected void updateImage(String handle) {
-					setImageUrl("https://robertsspaceindustries.com/citizens/" + handle);
-				}
 			}
 			// end::pictureField[]
 
@@ -261,15 +255,24 @@ public class CitizenForm extends AbstractForm {
 
 			@Order(40)
 			@ClassId("8679ade5-21fb-470e-8f00-13bd15199101")
-			public class MonikerField extends AbstractStringField {
+			public class MonikerField extends AbstractLabelField {
 
 				@Override
 				protected String getConfiguredLabel() {
 					return TEXTS.get("CommunityMoniker");
 				}
+
+				@Override
+				protected Class<? extends HandleField> getConfiguredMasterField() {
+					return HandleField.class;
+				}
+
+				@Override
+				protected void execChangedMasterValue(Object newMasterValue) {
+					setValue(RSICrawler.getCommunityMoniker((String) newMasterValue));
+				}
+
 			}
-			// end::nameFields[]
-			// tag::dateOfBirthField[]
 
 			@Order(50)
 			@ClassId("7c602360-9daa-44b8-abb6-94ccf9b9db59")

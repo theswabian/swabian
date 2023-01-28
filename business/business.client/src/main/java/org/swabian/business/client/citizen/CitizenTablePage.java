@@ -67,7 +67,6 @@ public class CitizenTablePage extends AbstractPageWithTable<Table> {
 		@Order(10)
 		@ClassId("4a8f5e0e-6eb8-4296-8ad7-012151f572f2")
 		public class EditMenu extends AbstractMenu {
-			// end::menu[]
 
 			@Override
 			protected String getConfiguredIconId() {
@@ -79,7 +78,6 @@ public class CitizenTablePage extends AbstractPageWithTable<Table> {
 				return "alt-e";
 			}
 
-			// tag::menu[]
 			@Override
 			protected String getConfiguredText() {
 				return TEXTS.get("Edit");
