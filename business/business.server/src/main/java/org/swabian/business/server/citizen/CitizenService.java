@@ -1,5 +1,7 @@
 package org.swabian.business.server.citizen;
 
+import java.util.UUID;
+
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.platform.holders.NVPair;
 import org.eclipse.scout.rt.platform.text.TEXTS;
@@ -35,6 +37,10 @@ public class CitizenService implements ICitizenService {
 		if (!ACCESS.check(new CreateCitizenPermission())) {
 			throw new VetoException(TEXTS.get("AuthorizationFailed"));
 		}
+		if (formData.getId() == null) {
+			formData.setId(UUID.randomUUID().toString());
+		}
+		SQL.insert(SQLCitizen.CITIZEN_INSERT, formData);
 		return formData;
 	}
 
@@ -52,7 +58,7 @@ public class CitizenService implements ICitizenService {
 		if (!ACCESS.check(new UpdateCitizenPermission())) {
 			throw new VetoException(TEXTS.get("AuthorizationFailed"));
 		}
-		// TODO [phohmann] add business logic here.
+		SQL.update(SQLCitizen.CITIZEN_UPDATE, formData);
 		return formData;
 	}
 }

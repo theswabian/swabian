@@ -1,7 +1,5 @@
 package org.swabian.business.shared.citizen;
 
-import java.util.UUID;
-
 import javax.annotation.Generated;
 
 import org.eclipse.scout.rt.shared.data.basic.table.AbstractTableRowData;
@@ -57,17 +55,17 @@ public class CitizenTablePageData extends AbstractTablePageData {
 		public static final String moniker = "moniker";
 		public static final String rank = "rank";
 		public static final String fluency = "fluency";
-		private UUID m_id;
+		private String m_id;
 		private String m_handle;
 		private String m_moniker;
 		private String m_rank;
 		private String m_fluency;
 
-		public UUID getId() {
+		public String getId() {
 			return m_id;
 		}
 
-		public void setId(UUID newId) {
+		public void setId(String newId) {
 			m_id = newId;
 		}
 

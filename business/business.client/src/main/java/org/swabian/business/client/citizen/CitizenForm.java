@@ -1,13 +1,12 @@
 package org.swabian.business.client.citizen;
 
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.eclipse.scout.rt.client.dto.FormData;
 import org.eclipse.scout.rt.client.dto.FormData.SdkCommand;
 import org.eclipse.scout.rt.client.ui.form.AbstractForm;
-import org.eclipse.scout.rt.client.ui.form.AbstractFormHandler;
 import org.eclipse.scout.rt.client.ui.form.IForm;
+import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractButton;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractCancelButton;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractOkButton;
 import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
@@ -51,32 +50,32 @@ import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.RankBo
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.RankBox.RankImageField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.SpaceField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.OkButton;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.UpdateButton;
 import org.swabian.business.client.common.AbstractDirtyFormHandler;
 import org.swabian.business.client.common.CountryLookupCall;
 import org.swabian.business.shared.citizen.CitizenFormData;
 import org.swabian.business.shared.citizen.ICitizenService;
 import org.swabian.business.shared.citizen.RSICrawler;
 import org.swabian.business.shared.citizen.RSIData;
-import org.swabian.business.shared.citizen.UpdateCitizenPermission;
 
 @FormData(value = CitizenFormData.class, sdkCommand = SdkCommand.CREATE) // <1>
 public class CitizenForm extends AbstractForm {
 
-	private UUID citizenId;
+	private String id;
 
 	@FormData
-	public UUID getCitizenId() {
-		return citizenId;
+	public String getId() {
+		return id;
 	}
 
 	@FormData
-	public void setCitizenId(UUID citizenId) {
-		this.citizenId = citizenId;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	@Override
 	public Object computeExclusiveKey() { // <3>
-		return getCitizenId();
+		return getId();
 	}
 
 	@Override
@@ -123,6 +122,10 @@ public class CitizenForm extends AbstractForm {
 
 	public EnlistedField getEnlistedField() {
 		return getFieldByClass(EnlistedField.class);
+	}
+
+	public UpdateButton getUpdateButton() {
+		return getFieldByClass(UpdateButton.class);
 	}
 
 	public NotesBox getNotesBox() {
@@ -246,7 +249,7 @@ public class CitizenForm extends AbstractForm {
 
 				@Override
 				protected int getConfiguredGridH() {
-					return 6;
+					return 7;
 				}
 
 				@Override
@@ -280,8 +283,8 @@ public class CitizenForm extends AbstractForm {
 				private String communityMoniker;
 
 				@Override
-				protected String getConfiguredLabel() {
-					return TEXTS.get("CommunityMoniker");
+				protected boolean getConfiguredLabelVisible() {
+					return false;
 				}
 
 				@Override
@@ -291,8 +294,18 @@ public class CitizenForm extends AbstractForm {
 				}
 
 				@Override
+				protected int getConfiguredGridH() {
+					return 2;
+				}
+
+				@Override
 				protected Class<? extends HandleField> getConfiguredMasterField() {
 					return HandleField.class;
+				}
+
+				@Override
+				protected boolean getConfiguredFillHorizontal() {
+					return true;
 				}
 
 				@Override
@@ -754,48 +767,27 @@ public class CitizenForm extends AbstractForm {
 		@ClassId("26612eb9-1832-4284-ac5a-9f450dc7ff9b")
 		public class CancelButton extends AbstractCancelButton {
 		}
-	}
-	// end::layout[]
 
-	// These classes (ModifyHandler and NewHandler) are only for documentation, they
-	// are not used in the application production:
-	// tag::handler[]
-	public class ModifyHandler extends AbstractFormHandler {
+		@Order(2000)
+		public class UpdateButton extends AbstractButton {
+			@Override
+			protected String getConfiguredLabel() {
+				return TEXTS.get("Update");
+			}
 
-		@Override
-		protected void execLoad() {
-			ICitizenService service = BEANS.get(ICitizenService.class); // <1>
-			CitizenFormData formData = new CitizenFormData();
-			exportFormData(formData); // <2>
-			formData = service.load(formData); // <3>
-			importFormData(formData); // <4>
-			setEnabledPermission(new UpdateCitizenPermission());
-			getForm().setSubTitle(calculateSubTitle()); // <5>
+			@Override
+			protected int getConfiguredHorizontalAlignment() {
+				return 1;
+			}
+
+			@Override
+			protected void execClickAction() {
+				getHandleField().fireValueChanged();
+			}
 		}
 
-		@Override
-		protected void execStore() {
-			ICitizenService service = BEANS.get(ICitizenService.class);
-			CitizenFormData formData = new CitizenFormData();
-			exportFormData(formData);
-			service.store(formData); // <6>
-		}
 	}
 
-	public class NewHandler extends AbstractFormHandler {
-
-		@Override
-		protected void execStore() {
-			ICitizenService service = BEANS.get(ICitizenService.class);
-			CitizenFormData formData = new CitizenFormData();
-			exportFormData(formData);
-			formData = service.create(formData); // <7>
-			importFormData(formData);
-		}
-	}
-	// end::handler[]
-
-	// This modify handler is used in the application:
 	public class ModifyDirtyHandler extends AbstractDirtyFormHandler {
 
 		@Override
@@ -828,7 +820,6 @@ public class CitizenForm extends AbstractForm {
 		}
 	}
 
-	// This new handler is used in the application:
 	public class NewDirtyHandler extends AbstractDirtyFormHandler {
 
 		@Override
@@ -846,21 +837,15 @@ public class CitizenForm extends AbstractForm {
 		}
 	}
 
-	@Override // <1>
+	@Override
 	protected boolean execValidate() {
-		boolean noFirstName = StringUtility.isNullOrEmpty(getHandleField().getValue());
-		boolean noLastName = StringUtility.isNullOrEmpty(getMonikerField().getValue());
-
-		if (noFirstName && noLastName) {
-			getHandleField().requestFocus(); // <2>
-
-			throw new VetoException(TEXTS.get("MissingName")); // <3>
+		if (StringUtility.isNullOrEmpty(getHandleField().getValue())) {
+			throw new VetoException(TEXTS.get("HandleMissing"));
 		}
-
 		return true;
 	}
 
 	protected String calculateSubTitle() {
-		return StringUtility.join(" - ", getMonikerField().getCommunityMoniker(), getHandleField().getValue());
+		return getMonikerField().getCommunityMoniker();
 	}
 }

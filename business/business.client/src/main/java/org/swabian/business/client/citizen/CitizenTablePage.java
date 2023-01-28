@@ -1,7 +1,5 @@
 package org.swabian.business.client.citizen;
 
-import java.util.UUID;
-
 import org.eclipse.scout.rt.client.dto.Data;
 import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
 import org.eclipse.scout.rt.client.ui.action.menu.IMenu;
@@ -87,7 +85,7 @@ public class CitizenTablePage extends AbstractPageWithTable<Table> {
 			@Override
 			protected void execAction() {
 				CitizenForm form = new CitizenForm();
-				form.setCitizenId(getIdColumn().getSelectedValue()); // <2>
+				form.setId(getIdColumn().getSelectedValue());
 				form.addFormListener(new CitizenFormListener());
 				form.startModify();
 			}
@@ -117,7 +115,7 @@ public class CitizenTablePage extends AbstractPageWithTable<Table> {
 		}
 
 		@Order(1000)
-		public class IdColumn extends AbstractColumn<UUID> {
+		public class IdColumn extends AbstractColumn<String> {
 
 			@Override
 			protected boolean getConfiguredPrimaryKey() {

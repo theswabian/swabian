@@ -11,14 +11,16 @@ public class Exceptional {
 			PSQLException exception = (PSQLException) cause;
 			String sqlState = exception.getSQLState();
 			switch (sqlState) {
-			case "23503": {
+			case "23503":
 				throw new VetoException(TEXTS.get("Fehler_Server_Sql_FKDelete"));
-			}
-			case "23505": {
+
+			case "23505":
 				throw new VetoException(TEXTS.get("Fehler_Server_Sql_Unique"));
-			}
+
+			case "23502":
+				throw new VetoException(TEXTS.get("Fehler_Server_Sql_NonNull", exception.getMessage()));
 			default:
-				throw new VetoException(TEXTS.get("Fehler_Server_Sql_Undefined", exception.getMessage()));
+				throw new VetoException(TEXTS.get("Fehler_Server_Sql_NonNull", exception.getMessage()));
 			}
 		}
 	}
