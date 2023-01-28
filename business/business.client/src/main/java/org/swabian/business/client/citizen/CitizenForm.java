@@ -41,6 +41,7 @@ import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.WorkBo
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.WorkBox.PhoneWorkField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.DetailsBox.WorkBox.PositionField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox;
+import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.EnlistedField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.FluencyField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.HandleField;
 import org.swabian.business.client.citizen.CitizenForm.MainBox.GeneralBox.MonikerField;
@@ -55,6 +56,7 @@ import org.swabian.business.client.common.CountryLookupCall;
 import org.swabian.business.shared.citizen.CitizenFormData;
 import org.swabian.business.shared.citizen.ICitizenService;
 import org.swabian.business.shared.citizen.RSICrawler;
+import org.swabian.business.shared.citizen.RSIData;
 import org.swabian.business.shared.citizen.UpdateCitizenPermission;
 
 @FormData(value = CitizenFormData.class, sdkCommand = SdkCommand.CREATE) // <1>
@@ -117,6 +119,10 @@ public class CitizenForm extends AbstractForm {
 
 	public FluencyField getFluencyField() {
 		return getFieldByClass(FluencyField.class);
+	}
+
+	public EnlistedField getEnlistedField() {
+		return getFieldByClass(EnlistedField.class);
 	}
 
 	public NotesBox getNotesBox() {
@@ -230,7 +236,7 @@ public class CitizenForm extends AbstractForm {
 
 				@Override // <3>
 				protected void execChangedMasterValue(Object newMasterValue) {
-					setImageUrl(RSICrawler.getAvatarUrl((String) newMasterValue));
+					setImageUrl(RSICrawler.queryUrl((String) newMasterValue, RSIData.AvatarUrl));
 				}
 
 				@Override
@@ -240,7 +246,7 @@ public class CitizenForm extends AbstractForm {
 
 				@Override
 				protected int getConfiguredGridH() {
-					return 5;
+					return 6;
 				}
 
 				@Override
@@ -292,10 +298,9 @@ public class CitizenForm extends AbstractForm {
 				@Override
 				protected void execChangedMasterValue(Object newMasterValue) {
 					String handle = (String) newMasterValue;
-					communityMoniker = RSICrawler.getCommunityMoniker(handle);
+					communityMoniker = RSICrawler.queryData(handle, RSIData.CommunityMoniker);
 					setValue("<p><span style=\"font-size:24px\"><a href=\"https://robertsspaceindustries.com/citizens/"
 							+ handle + "\"><strong>" + communityMoniker + "</strong></a></span></p>");
-//					setValue(RSICrawler.getCommunityMoniker(handle));
 				}
 
 				public String getCommunityMoniker() {
@@ -331,7 +336,7 @@ public class CitizenForm extends AbstractForm {
 
 					@Override
 					protected void execChangedMasterValue(Object newMasterValue) {
-						setValue(RSICrawler.getRank((String) newMasterValue));
+						setValue(RSICrawler.queryData((String) newMasterValue, RSIData.Rank));
 					}
 
 					@Override
@@ -352,7 +357,7 @@ public class CitizenForm extends AbstractForm {
 
 					@Override // <3>
 					protected void execChangedMasterValue(Object newMasterValue) {
-						setImageUrl(RSICrawler.getRankUrl((String) newMasterValue));
+						setImageUrl(RSICrawler.queryUrl((String) newMasterValue, RSIData.RankUrl));
 					}
 
 					@Override
@@ -388,12 +393,13 @@ public class CitizenForm extends AbstractForm {
 
 			}
 
-			@Order(2000)
+			@Order(1000)
 			@FormData(sdkCommand = FormData.SdkCommand.IGNORE)
 			public class FluencyField extends AbstractLabelField {
+
 				@Override
 				protected String getConfiguredLabel() {
-					return TEXTS.get("Fluency");
+					return TEXTS.get("Language");
 				}
 
 				@Override
@@ -403,7 +409,26 @@ public class CitizenForm extends AbstractForm {
 
 				@Override
 				protected void execChangedMasterValue(Object newMasterValue) {
-					setValue(RSICrawler.getFluency((String) newMasterValue));
+					setValue(RSICrawler.queryData((String) newMasterValue, RSIData.Fluency));
+				}
+			}
+
+			@Order(2000)
+			@FormData(sdkCommand = FormData.SdkCommand.IGNORE)
+			public class EnlistedField extends AbstractLabelField {
+				@Override
+				protected String getConfiguredLabel() {
+					return TEXTS.get("Enlisted");
+				}
+
+				@Override
+				protected Class<? extends HandleField> getConfiguredMasterField() {
+					return HandleField.class;
+				}
+
+				@Override
+				protected void execChangedMasterValue(Object newMasterValue) {
+					setValue(RSICrawler.queryData((String) newMasterValue, RSIData.Enlisted));
 				}
 			}
 

@@ -1,85 +1,72 @@
 package org.swabian.business.shared.citizen;
 
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.eclipse.scout.rt.platform.text.TEXTS;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RSICrawler {
 
-	public static String getCommunityMoniker(String handle) {
-		if (handle != null) {
-			try {
-				Document doc = Jsoup.connect("https://robertsspaceindustries.com/citizens/" + handle).get();
-				Elements communityMonikerElement = doc.selectXpath(
-						"/html/body/div[2]/div[2]/div[2]/div/div/div[2]/div[1]/div/div[1]/div/div[2]/p[1]/strong");
-				return communityMonikerElement.text();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return "";
-	}
+	static Logger logger = LoggerFactory.getLogger("RSICrawler");
+	private static Map<String, Map<RSIData, String>> handleCache = new HashMap<String, Map<RSIData, String>>();
 
-	public static String getAvatarUrl(String handle) {
+	public static String queryData(String handle, RSIData rsiData) {
 		if (handle != null) {
-			try {
-				Document doc = Jsoup.connect("https://robertsspaceindustries.com/citizens/" + handle).get();
-				Elements image = doc
-						.selectXpath("/html/body/div[2]/div[2]/div[2]/div/div/div[2]/div[1]/div/div[1]/div/div[1]/img");
-				String attr = image.attr("src");
-				return "https://robertsspaceindustries.com" + attr;
-			} catch (IOException e) {
-				e.printStackTrace();
+			if (!handleCache.containsKey(handle)) {
+				handleCache.put(handle, new HashMap<RSIData, String>());
 			}
-		}
-		return "";
-	}
-
-	public static String getRankUrl(String handle) {
-		if (handle != null) {
-			try {
-				Document doc = Jsoup.connect("https://robertsspaceindustries.com/citizens/" + handle).get();
-				Elements image = doc.selectXpath(
-						"/html/body/div[2]/div[2]/div[2]/div/div/div[2]/div[1]/div/div[1]/div/div[2]/p[3]/span[1]/img");
-				String rankUrl = image.attr("src");
-				if (rankUrl.startsWith("https")) {
-					return rankUrl;
+			if (handleCache.get(handle).get(rsiData) != null) {
+				return handleCache.get(handle).get(rsiData);
+			} else {
+				try {
+					String url = "https://robertsspaceindustries.com/citizens/" + handle;
+					Document document = Jsoup.connect(url).get();
+					Elements element = document.selectXpath(rsiData.getXpath());
+					logger.info(TEXTS.get("HandleQuerySuccessful", handle, url, rsiData.toString()));
+					String value = element.text();
+					handleCache.get(handle).put(rsiData, value);
+					return value;
+				} catch (Exception e) {
+					// Log a message with exception
+					logger.warn(TEXTS.get("HandleError", handle));
 				}
-				return "https://robertsspaceindustries.com" + rankUrl;
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 		return "";
+
 	}
 
-	public static String getRank(String handle) {
+	public static String queryUrl(String handle, RSIData rsiData) {
 		if (handle != null) {
-			try {
-				Document doc = Jsoup.connect("https://robertsspaceindustries.com/citizens/" + handle).get();
-				Elements communityMonikerElement = doc.selectXpath(
-						"/html/body/div[2]/div[2]/div[2]/div/div/div[2]/div[1]/div/div[1]/div/div[2]/p[3]/span[2]");
-				return communityMonikerElement.text();
-			} catch (IOException e) {
-				e.printStackTrace();
+			Map<RSIData, String> rsiDataMap = handleCache.get(handle);
+			if (rsiDataMap == null) {
+				handleCache.put(handle, new HashMap<RSIData, String>());
+			} else if (rsiDataMap.get(rsiData) != null) {
+				return rsiDataMap.get(rsiData);
+			} else {
+				try {
+					String url = "https://robertsspaceindustries.com/citizens/" + handle;
+					Document document = Jsoup.connect(url).get();
+					Elements element = document.selectXpath(rsiData.getXpath());
+					logger.info(TEXTS.get("HandleQuerySuccessful", handle, url));
+					String value = element.attr("src");
+					if (!value.startsWith("https")) {
+						value = "https://robertsspaceindustries.com" + value;
+					}
+					handleCache.get(handle).put(rsiData, value);
+					return value;
+				} catch (Exception e) {
+					// Log a message with exception
+					logger.warn(TEXTS.get("HandleError", handle));
+				}
 			}
 		}
 		return "";
-	}
 
-	public static String getFluency(String handle) {
-		if (handle != null) {
-			try {
-				Document doc = Jsoup.connect("https://robertsspaceindustries.com/citizens/" + handle).get();
-				Elements communityMonikerElement = doc
-						.selectXpath("/html/body/div[2]/div[2]/div[2]/div/div/div[2]/div[2]/div/p[3]/strong");
-				return communityMonikerElement.text();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return "";
 	}
 }
